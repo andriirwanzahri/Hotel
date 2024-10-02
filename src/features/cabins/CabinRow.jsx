@@ -1,6 +1,9 @@
 import styled from "styled-components";
 import { formatCurrency } from "../../utils/helpers";
 import { HiTrash } from "react-icons/hi2";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteCabin as deleteCabinApi } from "../../services/apiCabins";
+import toast from "react-hot-toast";
 
 const TableRow = styled.div`
   display: grid;
@@ -51,15 +54,35 @@ function CabinRow({ cabin }) {
     regularPrice,
     description,
   } = cabin;
+
+  const queryClient = useQueryClient();
+
+  // const { isLoading: isDeleting, mutate: deleteCabin } = useMutation({
+  const {
+    mutate: deleteCabin,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: deleteCabinApi,
+    onSuccess: () => {
+      toast.success("Data berhasil dihapus");
+      queryClient.invalidateQueries({
+        queryKey: ["cabins"],
+      });
+    },
+    onError: (err) => toast.error("Data tidak terhapus: " + err.message),
+  });
+  // console.log(x);
   return (
     <TableRow role="row">
-      <Img src={image} alt="" />
+      <Img src={image} alt={name} />
       <Cabin>{name}</Cabin>
       <div>Muat untuk {maxCapacity} Orang</div>
       <Price>{formatCurrency(regularPrice)}</Price>
       <Discount>{formatCurrency(discount)}</Discount>
-      <button>
-        <HiTrash />
+      <button onClick={() => deleteCabin(cabinId)} disabled={isPending}>
+        {isPending ? "Deleting..." : <HiTrash />}
       </button>
     </TableRow>
   );
