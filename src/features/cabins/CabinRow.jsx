@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import { formatCurrency } from "../../utils/helpers";
+import { HiTrash } from "react-icons/hi2";
 
 const TableRow = styled.div`
   display: grid;
@@ -38,3 +40,29 @@ const Discount = styled.div`
   font-weight: 500;
   color: var(--color-green-700);
 `;
+
+function CabinRow({ cabin }) {
+  const {
+    id: cabinId,
+    name,
+    image,
+    maxCapacity,
+    discount,
+    regularPrice,
+    description,
+  } = cabin;
+  return (
+    <TableRow role="row">
+      <Img src={image} alt="" />
+      <Cabin>{name}</Cabin>
+      <div>Muat untuk {maxCapacity} Orang</div>
+      <Price>{formatCurrency(regularPrice)}</Price>
+      <Discount>{formatCurrency(discount)}</Discount>
+      <button>
+        <HiTrash />
+      </button>
+    </TableRow>
+  );
+}
+
+export default CabinRow;
