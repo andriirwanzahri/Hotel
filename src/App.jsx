@@ -17,6 +17,7 @@ import { Toaster } from "react-hot-toast";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // staleTime: 60 * 1000,
       staleTime: 0,
     },
   },
@@ -26,6 +27,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
+
       <GlobalStyles />
       <BrowserRouter>
         <Routes>
@@ -38,6 +40,7 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/account" element={<Account />} />
           </Route>
+
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
@@ -49,13 +52,13 @@ function App() {
         containerStyle={{ margin: "8px" }}
         toastOptions={{
           success: {
-            duration: 3000,
+            duration: 2000,
           },
           error: {
-            duration: 5000,
+            duration: 4000,
           },
           style: {
-            fontSize: "16px",
+            fontSize: "12px",
             maxWidth: "500px",
             padding: "16px 24px",
             backgroundColor: "var(--color-grey-0)",
