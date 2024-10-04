@@ -1,14 +1,14 @@
-import styled from "styled-components";
+import { useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createCabin } from "../../services/apiCabins";
+
+import toast from "react-hot-toast";
 
 import Input from "../../ui/Input";
 import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
-import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createCabin } from "../../services/apiCabins";
-import toast from "react-hot-toast";
 import FormRow from "../../ui/FormRow";
 
 function CreateCabinForm() {
@@ -19,6 +19,7 @@ function CreateCabinForm() {
     reset,
     getValues,
   } = useForm();
+
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
@@ -31,11 +32,11 @@ function CreateCabinForm() {
     onError: (err) => toast.error(`data gagal di tambahkan ${err.message}`),
   });
 
-  console.log(errors);
   const onError = (errors, e) => console.log(errors, e);
 
   function onSubmit(data) {
-    mutate(data);
+    console.log(data.image[0]);
+    mutate({ ...data, image: data.image[0] });
   }
 
   return (
@@ -44,6 +45,7 @@ function CreateCabinForm() {
         <Input
           type="text"
           id="name"
+          disabled={isPending}
           {...register("name", { required: "Nama Harus di isi" })}
         />
       </FormRow>
@@ -52,7 +54,7 @@ function CreateCabinForm() {
         <Input
           type="number"
           id="maxCapacity"
-          // disabled={isWorking}
+          disabled={isPending}
           {...register("maxCapacity", {
             required: "This field is required",
             min: {
@@ -67,7 +69,7 @@ function CreateCabinForm() {
         <Input
           type="number"
           id="regularPrice"
-          // disabled={isWorking}
+          disabled={isPending}
           {...register("regularPrice", {
             required: "This field is required",
             min: {
@@ -82,8 +84,8 @@ function CreateCabinForm() {
         <Input
           type="number"
           id="discount"
-          // defaultValue={0}
-          // disabled={isWorking}
+          defaultValue={0}
+          disabled={isPending}
           {...register("discount", {
             required: "Can't be empty, make it at least 0",
             validate: (value) =>
@@ -96,24 +98,29 @@ function CreateCabinForm() {
 
       <FormRow errors={errors?.description?.message} label="Description">
         <Textarea
-          type="number"
+          type="text"
           id="description"
+          disabled={isPending}
           defaultValue=""
           {...register("description", { required: "Deskripsi harus diisi" })}
         />
       </FormRow>
 
-      <FormRow>
-        <FileInput id="image" accept="image/*" {...register("image")} />
+      <FormRow label="Image">
+        <FileInput
+          id="image"
+          disabled={isPending}
+          accept="image/*"
+          {...register("image")}
+        />
       </FormRow>
 
       <FormRow>
-        {/* type is an HTML attribute! */}
         <Button variation="secondary" type="reset">
           Cancel
         </Button>
         <Button type="submit" disabled={isPending}>
-          Edit cabin
+          {isPending ? "Loading ..." : "Tambah Cabin"}
         </Button>
       </FormRow>
     </Form>
