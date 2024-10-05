@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCabin } from "../../services/apiCabins";
 
 import toast from "react-hot-toast";
+import PropTypes from "prop-types";
 
 import Input from "../../ui/Input";
 import Form from "../../ui/Form";
@@ -11,18 +12,24 @@ import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import FormRow from "../../ui/FormRow";
 
-function CreateCabinForm() {
+function CreateCabinForm({ cabinToEdit = {} }) {
+  const { id: editId, ...editValue } = cabinToEdit;
+  const isEditSession = Boolean(editId);
+
   const {
     register,
     formState: { errors },
     handleSubmit,
     reset,
     getValues,
-  } = useForm();
+  } = useForm({
+    defaultValues: isEditSession ? editValue : {},
+  });
 
   const queryClient = useQueryClient();
 
-  const { mutate, isPending } = useMutation({
+  // 1. Menambahkan Cabin
+  const { mutate: creating, isPending: isCreating } = useMutation({
     mutationFn: createCabin,
     onSuccess: () => {
       toast.success("data berhasil ditambahkan");
@@ -32,11 +39,29 @@ function CreateCabinForm() {
     onError: (err) => toast.error(`data gagal di tambahkan ${err.message}`),
   });
 
+  // 2. mengedit Cabin
+  const { mutate: editting, isPending: isEditting } = useMutation({
+    mutationFn: ({ newCabinData, id }) => createCabin(newCabinData, id),
+    onSuccess: () => {
+      toast.success("data berhasil diEdit ...");
+      queryClient.invalidateQueries({ queryKey: ["cabins"] });
+      reset();
+    },
+    onError: (err) => toast.error(`data gagal di Eddit ${err.message}`),
+  });
+
+  // menentukan apakah datanya berada pada creating atau editing
+  const isWaiting = isCreating || isEditting;
+
   const onError = (errors, e) => console.log(errors, e);
 
+  //Kelola data dari form mau di masukkan kedalam creating atau editng
   function onSubmit(data) {
-    console.log(data.image[0]);
-    mutate({ ...data, image: data.image[0] });
+    const image = typeof data.image === "string" ? data.image : data.image[0];
+    // mengechek apakah datanya bersifat editing atau creating
+    if (isEditSession)
+      editting({ newCabinData: { ...data, image }, id: editId });
+    else creating({ ...data, image: data.image[0] });
   }
 
   return (
@@ -45,7 +70,7 @@ function CreateCabinForm() {
         <Input
           type="text"
           id="name"
-          disabled={isPending}
+          disabled={isWaiting}
           {...register("name", { required: "Nama Harus di isi" })}
         />
       </FormRow>
@@ -54,7 +79,7 @@ function CreateCabinForm() {
         <Input
           type="number"
           id="maxCapacity"
-          disabled={isPending}
+          disabled={isWaiting}
           {...register("maxCapacity", {
             required: "This field is required",
             min: {
@@ -69,7 +94,7 @@ function CreateCabinForm() {
         <Input
           type="number"
           id="regularPrice"
-          disabled={isPending}
+          disabled={isWaiting}
           {...register("regularPrice", {
             required: "This field is required",
             min: {
@@ -85,7 +110,7 @@ function CreateCabinForm() {
           type="number"
           id="discount"
           defaultValue={0}
-          disabled={isPending}
+          disabled={isWaiting}
           {...register("discount", {
             required: "Can't be empty, make it at least 0",
             validate: (value) =>
@@ -100,7 +125,7 @@ function CreateCabinForm() {
         <Textarea
           type="text"
           id="description"
-          disabled={isPending}
+          disabled={isWaiting}
           defaultValue=""
           {...register("description", { required: "Deskripsi harus diisi" })}
         />
@@ -109,9 +134,11 @@ function CreateCabinForm() {
       <FormRow label="Image">
         <FileInput
           id="image"
-          disabled={isPending}
+          disabled={isWaiting}
           accept="image/*"
-          {...register("image")}
+          {...register("image", {
+            required: isEditSession ? false : "Gambar Harus di isi ..",
+          })}
         />
       </FormRow>
 
@@ -119,12 +146,24 @@ function CreateCabinForm() {
         <Button variation="secondary" type="reset">
           Cancel
         </Button>
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Loading ..." : "Tambah Cabin"}
+        <Button type="submit" disabled={isWaiting}>
+          {isEditSession ? "Edit Cabin" : "Buat Cabin Baru"}
         </Button>
       </FormRow>
     </Form>
   );
 }
+
+CreateCabinForm.propTypes = {
+  cabinToEdit: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string,
+    maxCapacity: PropTypes.number,
+    regularPrice: PropTypes.number,
+    discount: PropTypes.number,
+    description: PropTypes.string,
+    image: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  }),
+};
 
 export default CreateCabinForm;
