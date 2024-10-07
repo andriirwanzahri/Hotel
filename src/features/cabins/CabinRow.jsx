@@ -1,11 +1,13 @@
-import styled from "styled-components";
-import { formatCurrency } from "../../utils/helpers";
-import { HiTrash } from "react-icons/hi2";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteCabin as deleteCabinApi } from "../../services/apiCabins";
-import toast from "react-hot-toast";
 import { useState } from "react";
+import { HiTrash } from "react-icons/hi2";
+import PropTypes from "prop-types";
+
+import { formatCurrency } from "../../utils/helpers";
+import styled from "styled-components";
+
 import CreateCabinFrom from "./CreateCabinForm";
+
+import { useDeleteCabin } from "./useDeleteCabin";
 
 const TableRow = styled.div`
   display: grid;
@@ -48,6 +50,7 @@ const Discount = styled.div`
 
 function CabinRow({ cabin }) {
   const [showForm, setShowForm] = useState(false);
+  const { isPending, deleteCabin } = useDeleteCabin();
 
   const {
     id: cabinId,
@@ -56,27 +59,8 @@ function CabinRow({ cabin }) {
     maxCapacity,
     discount,
     regularPrice,
-    description,
   } = cabin;
 
-  const queryClient = useQueryClient();
-
-  const {
-    mutate: deleteCabin,
-    isPending,
-    isError,
-    error,
-  } = useMutation({
-    mutationFn: deleteCabinApi,
-    onSuccess: () => {
-      toast.success("Data berhasil dihapus");
-      queryClient.invalidateQueries({
-        queryKey: ["cabins"],
-      });
-    },
-    onError: (err) => toast.error("Data tidak terhapus: " + err.message),
-  });
-  // console.log(x);
   return (
     <>
       <TableRow role="row">
@@ -84,7 +68,11 @@ function CabinRow({ cabin }) {
         <Cabin>{name}</Cabin>
         <div>Muat untuk {maxCapacity} Orang</div>
         <Price>{formatCurrency(regularPrice)}</Price>
-        <Discount>{formatCurrency(discount)}</Discount>
+        {discount ? (
+          <Discount>{formatCurrency(discount)}</Discount>
+        ) : (
+          <div>&mdash;</div>
+        )}
         <div>
           <button onClick={() => setShowForm(!showForm)}>Edit</button>
           <button onClick={() => deleteCabin(cabinId)} disabled={isPending}>
@@ -96,5 +84,9 @@ function CabinRow({ cabin }) {
     </>
   );
 }
+
+CabinRow.propTypes = {
+  cabin: PropTypes.Object,
+};
 
 export default CabinRow;

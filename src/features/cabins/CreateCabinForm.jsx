@@ -1,8 +1,4 @@
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createCabin } from "../../services/apiCabins";
-
-import toast from "react-hot-toast";
 import PropTypes from "prop-types";
 
 import Input from "../../ui/Input";
@@ -12,9 +8,18 @@ import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import FormRow from "../../ui/FormRow";
 
+import { useCreateCabin } from "./useCreateCabin";
+import { useEditCabin } from "./useEditCabin";
+
 function CreateCabinForm({ cabinToEdit = {} }) {
+  const { creating, isCreating } = useCreateCabin();
+  const { editting, isEditting } = useEditCabin();
+
   const { id: editId, ...editValue } = cabinToEdit;
   const isEditSession = Boolean(editId);
+  // menentukan apakah datanya berada pada creating atau editing
+  const isWaiting = isCreating || isEditting;
+  const onError = (errors, e) => console.log(errors, e);
 
   const {
     register,
@@ -26,42 +31,30 @@ function CreateCabinForm({ cabinToEdit = {} }) {
     defaultValues: isEditSession ? editValue : {},
   });
 
-  const queryClient = useQueryClient();
-
-  // 1. Menambahkan Cabin
-  const { mutate: creating, isPending: isCreating } = useMutation({
-    mutationFn: createCabin,
-    onSuccess: () => {
-      toast.success("data berhasil ditambahkan");
-      queryClient.invalidateQueries({ queryKey: ["cabins"] });
-      reset();
-    },
-    onError: (err) => toast.error(`data gagal di tambahkan ${err.message}`),
-  });
-
-  // 2. mengedit Cabin
-  const { mutate: editting, isPending: isEditting } = useMutation({
-    mutationFn: ({ newCabinData, id }) => createCabin(newCabinData, id),
-    onSuccess: () => {
-      toast.success("data berhasil diEdit ...");
-      queryClient.invalidateQueries({ queryKey: ["cabins"] });
-      reset();
-    },
-    onError: (err) => toast.error(`data gagal di Eddit ${err.message}`),
-  });
-
-  // menentukan apakah datanya berada pada creating atau editing
-  const isWaiting = isCreating || isEditting;
-
-  const onError = (errors, e) => console.log(errors, e);
-
   //Kelola data dari form mau di masukkan kedalam creating atau editng
   function onSubmit(data) {
     const image = typeof data.image === "string" ? data.image : data.image[0];
     // mengechek apakah datanya bersifat editing atau creating
     if (isEditSession)
-      editting({ newCabinData: { ...data, image }, id: editId });
-    else creating({ ...data, image: data.image[0] });
+      editting(
+        { newCabinData: { ...data, image }, id: editId },
+        {
+          onSuccess: (data) => {
+            console.log(data);
+            reset();
+          },
+        }
+      );
+    else
+      creating(
+        { ...data, image: image },
+        {
+          onSuccess: (data) => {
+            console.log(data);
+            reset();
+          },
+        }
+      );
   }
 
   return (
