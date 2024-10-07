@@ -27,6 +27,14 @@ const TableHeader = styled.header`
   padding: 1.6rem 2.4rem;
 `;
 
+const ZeroValue = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+`;
+
 function CabinTable() {
   const { isLoading, cabins } = useCabin();
   if (isLoading) return <Spinner />;
@@ -41,9 +49,11 @@ function CabinTable() {
           <div>Discount</div>
           <div></div>
         </TableHeader>
-        {cabins.map((cabin) => (
-          <CabinRow cabin={cabin} key={cabin.id} />
-        ))}
+        {cabins.length === 0 ? (
+          <ZeroValue>Data Cabin Kosong ... </ZeroValue>
+        ) : (
+          cabins.map((cabin) => <CabinRow cabin={cabin} key={cabin.id} />)
+        )}
       </Table>
     </>
   );

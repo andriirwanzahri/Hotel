@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { HiPencil, HiSquare2Stack, HiTrash } from "react-icons/hi2";
-import PropTypes from "prop-types";
+// import PropTypes from "prop-types";
 
 import { formatCurrency } from "../../utils/helpers";
 import styled from "styled-components";
@@ -9,6 +9,7 @@ import CreateCabinFrom from "./CreateCabinForm";
 
 import { useDeleteCabin } from "./useDeleteCabin";
 import { useCreateCabin } from "./useCreateCabin";
+import Modal from "../../ui/Modal";
 
 const TableRow = styled.div`
   display: grid;
@@ -99,7 +100,14 @@ function CabinRow({ cabin }) {
           </button>
         </div>
       </TableRow>
-      {showForm && <CreateCabinFrom cabinToEdit={cabin} />}
+      {showForm && (
+        <Modal onClose={() => setShowForm(false)}>
+          <CreateCabinFrom
+            cabinToEdit={cabin}
+            onCloseModal={() => setShowForm(false)}
+          />
+        </Modal>
+      )}
     </>
   );
 }
