@@ -10,6 +10,7 @@ import CreateCabinFrom from "./CreateCabinForm";
 import { useDeleteCabin } from "./useDeleteCabin";
 import { useCreateCabin } from "./useCreateCabin";
 import Modal from "../../ui/Modal";
+import ConfirmDelete from "../../ui/ConfirmDelete";
 
 const TableRow = styled.div`
   display: grid;
@@ -92,22 +93,32 @@ function CabinRow({ cabin }) {
           <button onClick={() => handleDuplicate()} disabled={isCreating}>
             <HiSquare2Stack />
           </button>
-          <button onClick={() => setShowForm(!showForm)}>
-            <HiPencil />
-          </button>
-          <button onClick={() => deleteCabin(cabinId)} disabled={isPending}>
-            {isPending ? "Deleting..." : <HiTrash />}
-          </button>
+
+          <Modal>
+            <Modal.Open opens="edit">
+              <button>
+                <HiPencil />
+              </button>
+            </Modal.Open>
+            <Modal.Open opens="delete">
+              <button>
+                <HiTrash />
+              </button>
+            </Modal.Open>
+
+            <Modal.Window name="edit">
+              <CreateCabinFrom cabinToEdit={cabin} />
+            </Modal.Window>
+            <Modal.Window name="delete">
+              <ConfirmDelete
+                resourceName="cabins"
+                disabled={isPending}
+                onConfirm={() => deleteCabin(cabinId)}
+              />
+            </Modal.Window>
+          </Modal>
         </div>
       </TableRow>
-      {showForm && (
-        <Modal onClose={() => setShowForm(false)}>
-          <CreateCabinFrom
-            cabinToEdit={cabin}
-            onCloseModal={() => setShowForm(false)}
-          />
-        </Modal>
-      )}
     </>
   );
 }
