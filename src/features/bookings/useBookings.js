@@ -1,8 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBookings } from "../../services/apiBookings";
 import { useSearchParams } from "react-router-dom";
+import { PAGE_SIZE } from "../../utils/constants";
 
 export function useBookings() {
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
 
   //filter
@@ -17,12 +19,13 @@ export function useBookings() {
   const [field, direction] = sortByRow.split("-");
   const sortBy = { field, direction };
 
+  // PAGINATION
   const page = !searchParams.get("page") ? 1 : Number(searchParams.get("page"));
 
   const {
     isLoading,
-    data: bookingsData = {},
-    // data: { data: bookings = [], count = 0 },
+    // data: bookingsData = {},
+    data: { data: bookings, count } = {},
     error,
   } = useQuery({
     // tambahkan argument kedua
@@ -31,6 +34,22 @@ export function useBookings() {
     queryFn: () => getBookings({ filter, sortBy, page }),
   });
   // Destructuring data dan count dari bookingsData
-  const { data: bookings = [], count = 0 } = bookingsData;
+  // const { data: bookings = [], count = 0 } = bookingsData;
+
+  // Pre-Fetching
+  // PRE-FETCHING
+  const pageCount = Math.ceil(count / PAGE_SIZE);
+
+  if (page < pageCount)
+    queryClient.prefetchQuery({
+      queryKey: ["bookings", filter, sortBy, page + 1],
+      queryFn: () => getBookings({ filter, sortBy, page: page + 1 }),
+    });
+
+  if (page > 1)
+    queryClient.prefetchQuery({
+      queryKey: ["bookings", filter, sortBy, page - 1],
+      queryFn: () => getBookings({ filter, sortBy, page: page - 1 }),
+    });
   return { isLoading, bookings, error, count };
 }
