@@ -83,7 +83,7 @@ function Pagination({ count }) {
     <StyledPagination>
       <P>
         Showing <span>{(currentPage - 1) * PAGE_SIZE + 1} </span>
-        to <span> {PAGE_SIZE * currentPage} </span>
+        to <span> {Math.min(PAGE_SIZE * currentPage, count)} </span>
         of <span> {count} </span> Result
       </P>
 

@@ -5,7 +5,7 @@ import { PAGE_SIZE } from "../../utils/constants";
 
 export function useBookings() {
   const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   //filter
   const filterValue = searchParams.get("status");
@@ -20,7 +20,7 @@ export function useBookings() {
   const sortBy = { field, direction };
 
   // PAGINATION
-  const page = !searchParams.get("page") ? 1 : Number(searchParams.get("page"));
+  let page = !searchParams.get("page") ? 1 : Number(searchParams.get("page"));
 
   const {
     isLoading,
@@ -36,7 +36,6 @@ export function useBookings() {
   // Destructuring data dan count dari bookingsData
   // const { data: bookings = [], count = 0 } = bookingsData;
 
-  // Pre-Fetching
   // PRE-FETCHING
   const pageCount = Math.ceil(count / PAGE_SIZE);
 
@@ -51,5 +50,6 @@ export function useBookings() {
       queryKey: ["bookings", filter, sortBy, page - 1],
       queryFn: () => getBookings({ filter, sortBy, page: page - 1 }),
     });
-  return { isLoading, bookings, error, count };
+
+  return { isLoading, error, bookings, count };
 }
