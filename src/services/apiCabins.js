@@ -33,7 +33,6 @@ export async function createCabin(newCabin, id) {
   const { data, error } = await query.select().single();
 
   if (error) {
-    console.log(error);
     throw new Error("Data Cabin Tidak Bisa di tambahkan..!");
   }
 
@@ -46,7 +45,6 @@ export async function createCabin(newCabin, id) {
   // 3. Hapus Data Cabin jika image tidat terupload
   if (storageError) {
     await supabase.from("cabins").delete().eq("id", data.id);
-    console.error(storageError);
     throw new Error("Cabin Tidak Bisa di di Upload");
   }
 
@@ -57,9 +55,7 @@ export async function deleteCabin(id) {
   const { data, error } = await supabase.from("cabins").delete().eq("id", id);
 
   if (error) {
-    console.error(error);
     throw new Error("Cabin could not be deleted");
   }
-  console.log(data);
   return data;
 }
