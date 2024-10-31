@@ -17,16 +17,20 @@ export function useBookings() {
   const [field, direction] = sortByRow.split("-");
   const sortBy = { field, direction };
 
+  const page = !searchParams.get("page") ? 1 : Number(searchParams.get("page"));
+
   const {
     isLoading,
-    data: bookings,
-    // error,
+    data: bookingsData = {},
+    // data: { data: bookings = [], count = 0 },
+    error,
   } = useQuery({
     // tambahkan argument kedua
-    queryKey: ["bookings", filter, sortBy],
+    queryKey: ["bookings", filter, sortBy, page],
     //memasukkan props ke api untuk melakukan filter dan sorting data bookings
-    queryFn: () => getBookings({ filter, sortBy }),
+    queryFn: () => getBookings({ filter, sortBy, page }),
   });
-
-  return { isLoading, bookings };
+  // Destructuring data dan count dari bookingsData
+  const { data: bookings = [], count = 0 } = bookingsData;
+  return { isLoading, bookings, error, count };
 }
