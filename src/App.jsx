@@ -33,6 +33,7 @@ function App() {
       <GlobalStyles />
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route element={<AppLayout />}>
             <Route index element={<Navigate replace to={"/dashboard"} />} />
             <Route path="/dashboard" element={<Dashboard />} />
