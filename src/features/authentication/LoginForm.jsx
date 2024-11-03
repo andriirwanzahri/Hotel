@@ -7,9 +7,9 @@ import { useLogin } from "./useLogin";
 import SpinnerMini from "../../ui/SpinnerMini";
 
 function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const { login, isLoading } = useLogin();
+  const [email, setEmail] = useState("andri@gmail.com");
+  const [password, setPassword] = useState("andriayu");
+  const { login, isPending } = useLogin();
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -24,6 +24,8 @@ function LoginForm() {
       }
     );
   }
+
+  console.log(isPending);
 
   return (
     <Form onSubmit={handleSubmit}>
@@ -47,8 +49,9 @@ function LoginForm() {
         />
       </FormRowVertical>
       <FormRowVertical>
-        <Button size="large" disabled={isLoading}>
-          {!isLoading ? "Log in" : <SpinnerMini />}
+        <Button size="large" disabled={isPending}>
+          {!isPending ? "Log in" : <SpinnerMini />}
+          {/* <SpinnerMini /> */}
         </Button>
       </FormRowVertical>
     </Form>
