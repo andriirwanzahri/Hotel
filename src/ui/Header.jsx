@@ -1,8 +1,6 @@
 import styled from "styled-components";
-import Logout from "../features/authentication/Logout";
-import ButtonIcon from "./ButtonIcon";
-import { HiOutlineUser } from "react-icons/hi2";
 import UserAvatar from "../features/authentication/UserAvatar";
+import HeaderMenu from "./HeaderMenu";
 
 const StyledHeader = styled.header`
   background-color: var(--color-grey-0);
@@ -14,29 +12,12 @@ const StyledHeader = styled.header`
   align-items: center;
   justify-content: flex-end;
 `;
-const StyledHeaderMenu = styled.ul`
-  display: flex;
-  gap: 0.4rem;
-`;
 
 function Header() {
   return (
     <StyledHeader>
       <UserAvatar />
-      <StyledHeaderMenu>
-        <li>
-          <ButtonIcon>
-            <HiOutlineUser />
-          </ButtonIcon>
-        </li>
-        <li>
-          {/* <DarkModeToggle /> */}
-          {/* DARK */}
-        </li>
-        <li>
-          <Logout />
-        </li>
-      </StyledHeaderMenu>
+      <HeaderMenu />
     </StyledHeader>
   );
 }
